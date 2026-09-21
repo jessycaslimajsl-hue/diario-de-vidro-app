@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diário de Vidro</title>
+<style>
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{margin:0;background:linear-gradient(135deg,#ffe3ee,#e8e0ff,#d6f5e3);min-height:100vh;padding-bottom:80px}
+.header{text-align:center;padding:24px 16px}
+.header h1{margin:0;color:#a5518a}
+.header p{color:#7a6a8a;margin:4px 0}
+.card{background:rgba(255,255,255,0.55);backdrop-filter:blur(12px);border-radius:20px;padding:16px;margin:12px;box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+.card h3{margin:0 0 8px;color:#8a4b7a}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);border-top:1px solid #eee}
+.nav button{flex:1;border:0;background:none;padding:12px 4px;font-size:12px;color:#a5518a}
+.page{display:none}.page.active{display:block}
+input,select,button{border-radius:12px;border:1px solid #e8c4da;padding:10px;margin:4px 0;width:100%}
+.btn{background:#e89ecf;color:white;border:0;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="header"><h1>📱 Diário de Vidro</h1><p>Pequenos hábitos. Grandes resultados.</p></div>
+
+<div id="inicio" class="page active">
+<div class="card"><h3>💕 Mensagem do dia</h3><p id="msg">Um dia de cada vez. Você não precisa fazer tudo perfeito.</p></div>
+<div class="card"><h3>⚖️ Peso</h3><p>Peso atual: <span id="pesoAtual">-</span></p><input id="inPeso" type="number" step="0.1" placeholder="Registrar peso hoje"><button class="btn" onclick="salvarPeso()">Salvar peso</button></div>
+<div class="card"><h3>🍓 Cardápio de hoje</h3><p id="cardapioHoje">Nenhum planejamento ainda.</p></div>
+<div class="card"><h3>🌷 Ciclo</h3><p id="cicloInfo">Registre sua menstruação na aba Mais.</p></div>
+</div>
+
+<div id="cardapio" class="page">
+<div class="card"><h3>🍓 Meu Cardápio</h3><input id="alimento" placeholder="Ex: Frango"><button class="btn" onclick="addAlimento()">Adicionar alimento</button><div id="listaAlimentos"></div></div>
+<div class="card"><h3>📅 Planejamento semanal</h3><p>Segunda a Domingo - em breve edição completa.</p></div>
+<div class="card"><h3>🛒 Lista de compras</h3><div id="listaCompras"><p>Nada por aqui ainda.</p></div></div>
+</div>
+
+<div id="calendario" class="page"><div class="card"><h3>📆 Meu Calendário</h3><input type="date" id="dataCal"><p id="infoDia">Escolha uma data.</p></div></div>
+<div id="evolucao" class="page"><div class="card"><h3>📈 Minha Evolução</h3><div id="histPeso"></div></div></div>
+<div id="mais" class="page">
+<div class="card"><h3>••• Mais</h3><button onclick="alert('Meu Tratamento em breve')">💊 Meu Tratamento</button><button onclick="alert('Meu Ciclo em breve')">🌷 Meu Ciclo</button><button onclick="alert('Lembretes nativos na próxima etapa')">🔔 Meus Lembretes</button><button onclick="alert('Diário pessoal em breve')">📝 Diário de Hoje</button></div>
+</div>
+
+<nav class="nav">
+<button onclick="show('inicio')">🏠<br>Início</button>
+<button onclick="show('cardapio')">🍓<br>Cardápio</button>
+<button onclick="show('calendario')">📅<br>Calendário</button>
+<button onclick="show('evolucao')">📈<br>Evolução</button>
+<button onclick="show('mais')">•••<br>Mais</button>
+</nav>
+<script>
+function show(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function salvarPeso(){const v=document.getElementById('inPeso').value;if(!v)return;let h=JSON.parse(localStorage.getItem('pesos')||'[]');h.push({data:new Date().toISOString().slice(0,10),peso:v});localStorage.setItem('pesos',JSON.stringify(h));document.getElementById('pesoAtual').innerText=v+' kg';atualizarHist()}
+function atualizarHist(){let h=JSON.parse(localStorage.getItem('pesos')||'[]');document.getElementById('histPeso').innerHTML=h.map(x=>x.data+': '+x.peso+' kg').join('<br>')||'Sem registros';if(h.length)document.getElementById('pesoAtual').innerText=h[h.length-1].peso+' kg'}
+function addAlimento(){const v=document.getElementById('alimento').value;if(!v)return;let l=JSON.parse(localStorage.getItem('alimentos')||'[]');l.push(v);localStorage.setItem('alimentos',JSON.stringify(l));document.getElementById('alimento').value='';listarAl()}
+function listarAl(){let l=JSON.parse(localStorage.getItem('alimentos')||'[]');document.getElementById('listaAlimentos').innerHTML=l.map(a=>'• '+a).join('<br>')}
+atualizarHist();listarAl();
+</script>
+</body>
+</html>
