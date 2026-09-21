@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  construir:
     runs-on: ubuntu-latest
 
     steps:
@@ -13,14 +13,42 @@ jobs:
 
       - name: Preparar projeto
         run: |
+          set -e
+
           mkdir -p build_project
-          unzip -q diario_de_vidro_android_v1_notificacoes.zip -d build_project
-          PROJECT_DIR=$(find build_project -maxdepth 2 -name settings.gradle.kts -printf '%h\n' | head -n 1)
-          if [ -z "$PROJECT_DIR" ]; then
-            echo "Projeto Android não encontrado dentro do ZIP."
-            find build_project -maxdepth 3 -type f | head -100
+
+          echo "Procurando arquivo ZIP do projeto..."
+
+          ZIP_FILE=$(find . -type f -name "diario_de_vidro_android_v1_notificacoes.zip" -print -quit)
+
+          if [ -z "$ZIP_FILE" ]; then
+            ZIP_FILE=$(find . -type f -name "*.zip" -print -quit)
+          fi
+
+          if [ -n "$ZIP_FILE" ]; then
+            echo "ZIP encontrado: $ZIP_FILE"
+            unzip -q "$ZIP_FILE" -d build_project
+          else
+            echo "Nenhum ZIP encontrado. Verificando se o projeto Android já está no repositório..."
+            cp -R ./* build_project/ 2>/dev/null || true
+            cp -R ./.??* build_project/ 2>/dev/null || true
+          fi
+
+          echo "Procurando gradlew..."
+
+          GRADLEW=$(find build_project -type f -name "gradlew" -print -quit)
+
+          if [ -z "$GRADLEW" ]; then
+            echo "ERRO: Não foi encontrado o arquivo gradlew."
+            echo ""
+            echo "Arquivos encontrados no projeto:"
+            find build_project -maxdepth 4 -type f | head -100
             exit 1
           fi
+
+          PROJECT_DIR=$(dirname "$GRADLEW")
+
+          echo "Projeto Android encontrado em: $PROJECT_DIR"
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
       - name: Configurar Java
@@ -30,19 +58,41 @@ jobs:
           java-version: '17'
 
       - name: Configurar Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Dar permissão ao Gradle
         working-directory: ${{ env.PROJECT_DIR }}
-        run: chmod +x gradlew
+        run: |
+          chmod +x gradlew
 
       - name: Gerar APK
         working-directory: ${{ env.PROJECT_DIR }}
-        run: ./gradlew assembleDebug --stacktrace
+        run: |
+          ./gradlew assembleDebug --stacktrace --no-daemon
+
+      - name: Localizar APK
+        run: |
+          echo "Procurando APK gerado..."
+
+          APK=$(find "$PROJECT_DIR" -type f -name "*.apk" -print -quit)
+
+          if [ -z "$APK" ]; then
+            echo "ERRO: Nenhum APK foi encontrado."
+            echo ""
+            echo "Conteúdo da pasta de build:"
+            find "$PROJECT_DIR" -type f | grep -E "build|apk" | head -100 || true
+            exit 1
+          fi
+
+          echo "APK encontrado:"
+          echo "$APK"
+
+          mkdir -p apk_final
+          cp "$APK" apk_final/DiarioDeVidro.apk
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
           name: DiarioDeVidro-APK
-          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/app-debug.apk
+          path: apk_final/DiarioDeVidro.apk
           if-no-files-found: error
