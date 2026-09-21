@@ -1,1 +1,32 @@
-
+name: Gerar APK - Diário de Vidro
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar projeto
+        run: |
+          mkdir -p build_project
+          ZIP=$(ls *.zip | head -n 1)
+          unzip -o "$ZIP" -d build_project
+          PROJ=$(find build_project -maxdepth 3 -name "gradlew" | head -n 1 | xargs dirname)
+          echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Build APK
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: diario-de-vidro-apk
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
