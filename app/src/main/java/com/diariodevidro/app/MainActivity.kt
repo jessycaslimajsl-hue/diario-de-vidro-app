@@ -1,14 +1,15 @@
 package com.diariodevidro.app
+import android.app.Activity
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
 import android.widget.TextView
 import android.view.Gravity
-class MainActivity : AppCompatActivity() {
+
+class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val t = TextView(this)
-        t.text = "Diário de Vidro\nFuncionou!"
-        t.textSize = 28f
+        t.text = "Funcionou!"
+        t.textSize = 30f
         t.gravity = Gravity.CENTER
         setContentView(t)
     }
