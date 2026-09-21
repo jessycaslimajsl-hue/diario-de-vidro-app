@@ -1,12 +1,5 @@
-plugins { id 'com.android.application' }
-android {
-    namespace 'com.diariodevidro.app'
-    compileSdk 34
-    defaultConfig {
-        applicationId 'com.diariodevidro.app'
-        minSdk 24
-        targetSdk 34
-        versionCode 2
-        versionName '1.0'
-    }
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
 }
+allprojects { repositories { google(); mavenCentral() } }
