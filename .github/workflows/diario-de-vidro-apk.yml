@@ -1,4 +1,4 @@
-name: Gerar APK - Diário de Vidro
+name: Gerar APK - Diario de Vidro
 on:
   workflow_dispatch:
 jobs:
@@ -7,11 +7,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Preparar projeto
-        run: run: |
+        run: |
+          rm -rf build_project
           mkdir -p build_project
           ZIP=$(ls *.zip | head -n 1)
           unzip -o "$ZIP" -d build_project
-          PROJ=$(find build_project -maxdepth 3 -name "gradlew" | head -n 1 | xargs dirname)
+          PROJ=$(find build_project -name "gradlew" | head -n 1 | xargs dirname)
+          if [ -z "$PROJ" ]; then PROJ="build_project"; fi
           echo "PROJECT_DIR=$PROJ" >> $GITHUB_ENV
       - name: Setup Java
         uses: actions/setup-java@v4
