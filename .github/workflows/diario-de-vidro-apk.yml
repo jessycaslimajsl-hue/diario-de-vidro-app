@@ -7,7 +7,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Preparar projeto
-        run: |
+        run: run: |
           mkdir -p build_project
           ZIP=$(ls *.zip | head -n 1)
           unzip -o "$ZIP" -d build_project
