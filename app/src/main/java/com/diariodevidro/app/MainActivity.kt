@@ -1,17 +1,20 @@
-package com.diariodevidro.app;
-import android.app.Activity;
-import android.os.Bundle;
-import android.widget.TextView;
-import android.view.Gravity;
+package com.diariodevidro.app
 
-public class MainActivity extends Activity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        TextView tv = new TextView(this);
-        tv.setText("Funcionou!");
-        tv.setTextSize(30);
-        tv.setGravity(Gravity.CENTER);
-        setContentView(tv);
+import android.os.Bundle
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val webView = WebView(this)
+        webView.settings.javaScriptEnabled = true
+        webView.webViewClient = WebViewClient()
+
+        webView.loadUrl("file:///android_asset/index.html")
+
+        setContentView(webView)
     }
 }
